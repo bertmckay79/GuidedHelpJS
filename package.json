@@ -1,6 +1,6 @@
 {
   "name": "@bm3d/guided",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Framework-agnostic, offline-first guided tutorials with JSON definitions, ID and data-feature targets",
   "private": false,
   "type": "module",
@@ -36,7 +36,7 @@
   ],
   "scripts": {
     "test": "node --test",
-    "check": "node --check src/index.js && node --check src/tutorials.js && node --check src/spotlight.js && node --check src/tutorial-presenter.js && node --check src/vue.js && node --check src/authoring/draft.js && node --check src/authoring/picker.js && node --check src/authoring/index.js && node --check examples/author.js",
+    "check": "node --check src/index.js && node --check src/tutorials.js && node --check src/spotlight.js && node --check src/tutorial-presenter.js && node --check src/vue.js && node --check src/authoring/draft.js && node --check src/authoring/picker.js && node --check src/authoring/index.js && node --check examples/author.js && node --check src/theme.js",
     "test:browser": "playwright test"
   },
   "peerDependencies": {
