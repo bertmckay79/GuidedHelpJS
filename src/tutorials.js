@@ -144,6 +144,8 @@ export function createTutorialEngine({tutorials=[],progress=null,getContext=()=>
     if(c.authRequired||c.authChecking||c.authBusy||c.sessionExpired)return 'authentication-required';
     if(c.modal||c.busy||c.uploading||c.fullscreenTransition||c.interactionActive||
        c.windowHidden)return 'host-busy';
+    const tourRestriction=tutorialEligibility(active,c);
+    if(tourRestriction)return tourRestriction;
     if(step.page&&c.page!==step.page)return 'page-unavailable';
     if(step.stage&&c.stage!==step.stage)return 'stage-unavailable';
     if(step.capability&&!(c.capabilities||[]).includes(step.capability))
