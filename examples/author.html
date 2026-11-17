@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>GuidedHelpJS - Recorder / Authoring demo</title>
+  <link rel="stylesheet" href="../src/styles.css">
+  <link rel="stylesheet" href="../src/authoring/authoring.css">
+  <style>
+    body{font:16px/1.5 system-ui,sans-serif;max-width:900px;margin:2rem auto;padding:1.5rem}
+    .demo-controls{display:flex;gap:1rem;flex-wrap:wrap;margin:2rem 0}
+    .demo-controls button{padding:.8rem 1rem}
+    output{display:block;margin:1rem 0}
+    main{padding-right:min(420px,45vw)}
+    @media(max-width:900px){main{padding-right:0}body{padding-bottom:60vh}}
+  </style>
+</head>
+<body>
+  <main>
+    <h1 id="demoWelcome">Tutorial Recorder</h1>
+    <p>This is a real HTML page. Open the authoring panel, choose Record, then select these controls. Selection must not activate them.</p>
+    <button id="openAuthor">Open tutorial authoring panel</button>
+    <div class="demo-controls">
+      <button id="createProjectButton">Create Project (real action)</button>
+      <button data-feature="demo.settings">Project settings (real action)</button>
+      <button id="openFiles">Open Files (real action)</button>
+    </div>
+    <label>Private form value (never record):
+      <input id="demoSecretInput" type="password" autocomplete="off">
+    </label>
+    <output id="hostResult" aria-live="polite">Host actions: 0</output>
+    <p>The recorder exports a JSON tutorial that you can import back and preview using the production runtime. No event values or passwords are captured.</p>
+    <p><a href="./">Back to the normal tutorial demo</a></p>
+  </main>
+  <script type="module" src="./author.js"></script>
+</body>
+</html>
