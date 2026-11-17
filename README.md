@@ -4,7 +4,7 @@
 
 Lightweight, offline-first, framework-agnostic JavaScript guided tutorials built around **real HTML controls**. Supports existing element IDs, `data-feature` attributes, JSON tutorial definitions, local progress and safe interaction. Optional Vue 3 integration.
 
-> **Status:** v0.3.0 development preview. This repository is not yet published to npm; the API is subject to change. Sprite Rig Studio still uses its own existing implementation until an independently tested migration is merged.
+> **Status:** v0.4.0 development preview. This repository is not yet published to npm; the API is subject to change. Sprite Rig Studio still uses its own existing implementation until an independently tested migration is merged.
 
 ## Features
 
@@ -149,6 +149,52 @@ The authoring UI includes an **Appearance** tab where you can pick a fixed CSS c
 For a working side-by-side example, visit [the authoring demo](./examples/author.html) and select **Use purple palette**, **Map application CSS variables**, or **Use app/default CSS**.
 
 **Accessibility note:** Users can select palettes that lack sufficient contrast; when creating app themes, check colour contrast in both light and dark host modes. The default styles honour reduced motion, but custom colours still require application-level accessibility review.
+
+## Session-storage tutorial definitions
+
+Applications can opt into loading **tutorial definitions** from the browser's `sessionStorage` instead of hard-coding every tutorial in the bundle. The library reads a JSON object or array of tutorial objects at initialization. This is separate from the existing `storage` option, which controls **progress tracking** (using `localStorage` by default).
+
+```js
+import {createGuidedHelp} from '@bm3d/guided';
+
+const key='myapp.help:catalogue:v1';
+
+// The host application or development authoring tool explicitly writes definitions.
+sessionStorage.setItem(key,JSON.stringify([{
+  id:'home.session-tour',
+  title:'Getting Started',
+  category:'Basics',
+  summary:'Explore an existing control.',
+  steps:[{
+    id:'projects',
+    title:'Projects',
+    body:'This is your existing Projects button.',
+    target:{id:'projectsButton'},
+    advance:'explicit-next'
+  }]
+}]));
+
+const help=createGuidedHelp({
+  namespace:'myapp.help',
+  tutorials:builtInTutorials, // optional; combined with the session source
+  sessionTutorials:{key},     // read this tab's sessionStorage
+  getContext:()=>({page:'home'})
+});
+
+// After the host updates sessionStorage, reload explicitly:
+help.reloadSessionTutorials();
+console.log(help.tutorials.map(t=>t.id));
+```
+
+The optional `sessionTutorials.storage` property accepts an injected Storage-compatible reader (useful in tests). If `key` is omitted the default is `<namespace>:catalogue:v1`. A missing key is an empty catalogue. Session tutorials and built-in tutorials must have **unique IDs**; duplicates cause a validation error.
+
+The loader validates every tutorial against the same registry as bundled JSON. It refuses malformed JSON, unexpected fields, unsafe targets, duplicate IDs, more than **100 tutorials**, and payloads over **256 KiB**. It does not evaluate code, run scripts or call network services. Invalid data or denied storage access is reported as an error, rather than silently replacing the current working tutorial catalogue.
+
+`reloadSessionTutorials()` validates the new contents **before** changing the registry. On success it clears the current active tutorial, removes its spotlight, and makes the new catalogue available. On failure it preserves the prior catalogue and any active tutorial. There is no automatic polling or listening for changes.
+
+The storage API is **read-only from the library's perspective**. The host writes via `sessionStorage.setItem`, and can remove the key to clear session tutorials. Data generally survives reloads in that tab but not the end of its tab session; all scripts sharing the page's origin may access it. **Do not put secrets, credentials, user data or access tokens into tutorial definitions.** Never use session tutorial JSON as an authorization mechanism.
+
+Try [the session-storage browser demo](./examples/session.html) with the local server to see writing, loading, replacing, previewing and clearing the definitions without any framework.
 
 ## Use in Vanilla JavaScript
 
