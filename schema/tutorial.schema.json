@@ -1,0 +1,206 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/bertmckay79/GuidedHelpJS/blob/main/schema/tutorial.schema.json",
+  "title": "GuidedHelpJS Tutorial",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "summary",
+    "category",
+    "steps"
+  ],
+  "properties": {
+    "id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 260
+    },
+    "category": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "page": {
+      "$ref": "#/$defs/identifier"
+    },
+    "stage": {
+      "$ref": "#/$defs/identifier"
+    },
+    "capability": {
+      "$ref": "#/$defs/identifier"
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "items": {
+        "$ref": "#/$defs/step"
+      }
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120,
+      "pattern": "^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$"
+    },
+    "htmlId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120,
+      "pattern": "^[A-Za-z_][A-Za-z0-9_.:-]*$"
+    },
+    "target": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/identifier"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id"
+          ],
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/htmlId"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "feature"
+          ],
+          "properties": {
+            "feature": {
+              "$ref": "#/$defs/identifier"
+            }
+          }
+        }
+      ]
+    },
+    "step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "body",
+        "target",
+        "advance"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "body": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 600
+        },
+        "target": {
+          "$ref": "#/$defs/target"
+        },
+        "page": {
+          "$ref": "#/$defs/identifier"
+        },
+        "stage": {
+          "$ref": "#/$defs/identifier"
+        },
+        "capability": {
+          "$ref": "#/$defs/identifier"
+        },
+        "availability": {
+          "$ref": "#/$defs/identifier"
+        },
+        "advance": {
+          "enum": [
+            "explicit-next",
+            "observed-user-interaction",
+            "read-only-state-reached"
+          ]
+        },
+        "eventType": {
+          "enum": [
+            "click",
+            "change"
+          ]
+        },
+        "signal": {
+          "$ref": "#/$defs/identifier"
+        },
+        "optional": {
+          "type": "boolean"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "advance": {
+                "const": "observed-user-interaction"
+              }
+            },
+            "required": [
+              "advance"
+            ]
+          },
+          "then": {
+            "required": [
+              "eventType"
+            ]
+          },
+          "else": {
+            "not": {
+              "required": [
+                "eventType"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "advance": {
+                "const": "read-only-state-reached"
+              }
+            },
+            "required": [
+              "advance"
+            ]
+          },
+          "then": {
+            "required": [
+              "signal"
+            ]
+          },
+          "else": {
+            "not": {
+              "required": [
+                "signal"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+}
