@@ -1,15 +1,18 @@
-import type {Context,Tutorial,Target, TourState} from '../index.js';
+import type {Context,Tutorial,Target, TourState,GuidedTheme} from '../index.js';
 export interface RecorderOptions {
   document?:Document;window?:Window;
   getContext?:()=>Context;
   initialTutorial?:Tutorial|null;
-  onChange?:(state:{mode:'edit'|'record'|'preview';draft:Tutorial;errors:string[]})=>void;
+  theme?:GuidedTheme;
+  onChange?:(state:{mode:'edit'|'record'|'preview'|'appearance';draft:Tutorial;errors:string[]})=>void;
 }
 export interface TutorialRecorder {
   mount():boolean;
   destroy():void;
-  setMode(mode:'edit'|'record'|'preview'):boolean;
-  getMode():'edit'|'record'|'preview';
+  setMode(mode:'edit'|'record'|'preview'|'appearance'):boolean;
+  setTheme(theme:GuidedTheme):void;
+  getTheme():GuidedTheme;
+  getMode():'edit'|'record'|'preview'|'appearance';
   getDraft():Tutorial;
   getErrors():string[];
   getPreviewState():TourState|null;
