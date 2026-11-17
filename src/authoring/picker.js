@@ -1,4 +1,5 @@
 import {suggestedTarget} from './draft.js';
+import {applyTheme,normalizeTheme} from '../theme.js';
 
 // Capturing selection never runs host actions, even when a selected element is a button.
 export function createTargetPicker({
@@ -7,13 +8,17 @@ export function createTargetPicker({
   onHighlight=()=>{},
   onCancel=()=>{},
   isEditorElement=()=>false,
+  theme={},
   root
 }={}) {
   if(!doc?.addEventListener||!doc?.removeEventListener)
     throw new TypeError('A DOM document is required');
+  normalizeTheme(theme);
+  let activeTheme=theme,clearCandidateTheme=()=>{};
   let enabled=false,hovered=null;
   const isEditor=event=>isEditorElement(event.target);
   const clear=()=>{
+    clearCandidateTheme();clearCandidateTheme=()=>{};
     if(hovered)hovered.classList?.remove('ghr-candidate');
     hovered=null;
   };
@@ -22,6 +27,7 @@ export function createTargetPicker({
     clear();
     hovered=element;
     hovered?.classList?.add('ghr-candidate');
+    if(hovered)clearCandidateTheme=applyTheme(hovered,activeTheme);
     onHighlight(hovered);
   };
   const keydown=event=>{
@@ -90,5 +96,13 @@ export function createTargetPicker({
     for(const [type,handler,opts] of listeners)doc.removeEventListener(type,handler,opts);
     clear();
   }
-  return Object.freeze({activate,deactivate,destroy:deactivate,isActive:()=>enabled});
+  return Object.freeze({
+    activate,deactivate,destroy:deactivate,isActive:()=>enabled,
+    setTheme(next){
+      normalizeTheme(next);
+      activeTheme=next;
+      clearCandidateTheme();clearCandidateTheme=()=>{};
+      if(hovered)clearCandidateTheme=applyTheme(hovered,activeTheme);
+    }
+  });
 }
