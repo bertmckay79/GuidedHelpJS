@@ -44,7 +44,7 @@ test('record three controls safely, edit, preview and round-trip JSON',async({pa
   await page.getByLabel('Paste tutorial JSON').fill(JSON.stringify(json));
   await page.getByRole('button',{name:'Validate and import'}).click();
   await expect(page.getByRole('heading',{name:'Steps (3/32)'})).toBeVisible();
-  await expect(page.getByRole('status')).toContainText('Tutorial imported');
+  await expect(page.locator('.ghr-panel .ghr-status')).toContainText('Tutorial imported');
 });
 
 test('private form controls cannot be recorded; switching modes leaves no picker',async({page})=>{
