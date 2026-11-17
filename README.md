@@ -4,7 +4,7 @@
 
 Lightweight, offline-first, framework-agnostic JavaScript guided tutorials built around **real HTML controls**. Supports existing element IDs, `data-feature` attributes, JSON tutorial definitions, local progress and safe interaction. Optional Vue 3 integration.
 
-> **Status:** v0.2.0 development preview. This repository is not yet published to npm; the API is subject to change. Sprite Rig Studio still uses its own existing implementation until an independently tested migration is merged.
+> **Status:** v0.3.0 development preview. This repository is not yet published to npm; the API is subject to change. Sprite Rig Studio still uses its own existing implementation until an independently tested migration is merged.
 
 ## Features
 
@@ -71,6 +71,84 @@ Import accepts only one tutorial JSON object (1–32 steps) and rejects unknown 
 **Safety:** "Record" means **select and describe targets**, not capture screen video, event replay or keystrokes. Private input fields and `data-guided-private` sections are unselectable. During selection, click, pointer and keyboard activation on host controls is intercepted; while editing/previewing, host interaction remains under the user's control. The recorder is not an app automation tool.
 
 Current limitations: automatic route navigation, targetless introductory steps, arbitrary CSS selectors, draft autosave, native WebView2/touch verification and visual regression coverage are intentionally outside this first version. Live browser tests cover the provided Chromium demo, not every host application.
+
+## Styling and theme configuration
+
+The runtime and optional authoring recorder share **semantic CSS custom properties** with the `--gh-` prefix. Applications can configure styling through CSS alone, pass a JavaScript colour palette, or map roles to the application's existing CSS variable names. Appearance is **host configuration** and is intentionally **not embedded in exported tutorial JSON**.
+
+### Option 1: Override CSS variables
+
+Include `@bm3d/guided/styles.css` (and `@bm3d/guided/recorder/styles.css` for authoring), then add your application's own declarations:
+
+```css
+:root {
+  --app-primary: #7c3aed;
+  --app-panel: #f6f1ff;
+
+  --gh-accent: var(--app-primary);
+  --gh-highlight: var(--app-primary);
+  --gh-focus: var(--app-primary);
+  --gh-surface: var(--app-panel);
+  --gh-text: #271041;
+  --gh-button-bg: #e9ddff;
+  --gh-button-text: #271041;
+}
+```
+
+This approach needs **no JavaScript configuration**. It works for Vue, Razor, React and plain HTML. All overrides fall back to the built-in light/dark defaults where the host leaves a token unspecified.
+
+### Option 2: Provide a palette or variable-name mapping
+
+```js
+import {createGuidedHelp} from '@bm3d/guided';
+
+const help=createGuidedHelp({
+  tutorials:approvedTutorials,
+  namespace:'myapp.help',
+  getContext:()=>({page:'home'}),
+  theme:{
+    palette:{
+      surface:'#f6f1ff',
+      text:'#271041',
+      buttonBackground:'#e9ddff',
+      buttonText:'#271041'
+    },
+    variables:{
+      accent:'--app-primary',
+      highlight:'--app-primary',
+      focus:'--app-primary'
+    }
+  }
+});
+
+// Switch the active theme without remounting a tutorial.
+help.setTheme({
+  variables:{accent:'--brand-accent',surface:'--brand-panel'}
+});
+```
+
+A palette value must be a CSS colour (hex, named colour, rgb/hsl/oklch, etc.); a variable mapping must be a **CSS custom property name**, for example `--app-primary`, not a CSS declaration or selector. Do not set the same role in both objects. Unknown roles and unsafe values are rejected. No arbitrary CSS is evaluated or injected. Use `--gh-shadow` directly in CSS for advanced shadows.
+
+Supported roles:
+
+| Theme role | CSS property | Purpose |
+| --- | --- | --- |
+| `accent`, `accentText` | `--gh-accent`, `--gh-accent-text` | Selected navigation and its text |
+| `surface`, `text`, `mutedText` | `--gh-surface`, `--gh-text`, `--gh-muted-text` | Panel background and text |
+| `border` | `--gh-border` | Fields, buttons and panel edges |
+| `buttonBackground`, `buttonText` | `--gh-button-bg`, `--gh-button-text` | Buttons |
+| `fieldBackground`, `fieldText` | `--gh-field-bg`, `--gh-field-text` | Recorder input fields |
+| `highlight`, `focus` | `--gh-highlight`, `--gh-focus` | Highlighted target / keyboard outline |
+| `selectedBackground`, `statusBackground`, `warningText` | `--gh-selected-bg`, `--gh-status-bg`, `--gh-warning-text` | Recorder selection and help messages |
+| `shadow` | `--gh-shadow` | Panel shadows |
+
+The library applies configured values only to its own panels and temporarily to the highlighted host control. It **restores previous inline CSS** when the target changes or the tutorial is destroyed; it never overwrites the host's global theme. CSS-only `--gh-*` variables naturally inherit from the application.
+
+The authoring UI includes an **Appearance** tab where you can pick a fixed CSS colour or enter an existing CSS variable name for each role. Changes are reflected in the recorder and in live preview. The configuration JSON is displayed separately for copying into the host app; tutorial export remains appearance-neutral.
+
+For a working side-by-side example, visit [the authoring demo](./examples/author.html) and select **Use purple palette**, **Map application CSS variables**, or **Use app/default CSS**.
+
+**Accessibility note:** Users can select palettes that lack sufficient contrast; when creating app themes, check colour contrast in both light and dark host modes. The default styles honour reduced motion, but custom colours still require application-level accessibility review.
 
 ## Use in Vanilla JavaScript
 

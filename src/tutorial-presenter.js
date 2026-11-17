@@ -1,10 +1,13 @@
 import {createSpotlightLayer,resolveSpotlightTarget} from './spotlight.js';
+import {normalizeTheme} from './theme.js';
 import {targetKey} from './tutorials.js';
 
 // Presentation-only bridge for live DOM anchors. Only observes native user events;
 // it never dispatches a click, changes application state or sends API requests.
 export function createTutorialPresenter({document:doc,window:win,
-  onPosition=()=>{},onAvailability=()=>{},onInteraction=()=>{}}={}) {
+  onPosition=()=>{},onAvailability=()=>{},onInteraction=()=>{},theme={}}={}) {
+  normalizeTheme(theme);
+  let activeTheme=theme;
   let step=null,layer=null,target=null,observer=null,destroyed=false,available=false;
   function notify(value){
     if(available===value)return;
@@ -22,7 +25,7 @@ export function createTutorialPresenter({document:doc,window:win,
     if(element===target&&layer)return;
     releaseLayer();
     const activeStep=step;
-    layer=createSpotlightLayer({document:doc,window:win,
+    layer=createSpotlightLayer({document:doc,window:win,theme:activeTheme,
       onPosition:placement=>{if(!destroyed&&step===activeStep)onPosition(placement);},
       onUnavailable:()=>{
         if(step===activeStep){
@@ -63,6 +66,11 @@ export function createTutorialPresenter({document:doc,window:win,
     },
     reposition(){if(step)reconcile();layer?.reposition();},
     targetAvailable(){return available;},
+    setTheme(next){
+      normalizeTheme(next);
+      activeTheme=next;
+      layer?.setTheme(next);
+    },
     destroy(){
       if(destroyed)return;
       destroyed=true;releaseLayer();step=null;

@@ -1,4 +1,11 @@
 export type Target = string | {id:string} | {feature:string};
+export type ThemeToken = 'accent'|'accentText'|'surface'|'text'|'mutedText'|'border'
+  |'buttonBackground'|'buttonText'|'fieldBackground'|'fieldText'|'highlight'
+  |'focus'|'selectedBackground'|'statusBackground'|'warningText'|'shadow';
+export interface GuidedTheme {
+  palette?:Partial<Record<ThemeToken,string>>;
+  variables?:Partial<Record<ThemeToken,string>>;
+}
 export type Advance = 'explicit-next'|'observed-user-interaction'|'read-only-state-reached';
 export interface TutorialStep {
   id:string;title:string;body:string;target:Target;advance:Advance;
@@ -22,7 +29,7 @@ export interface GuidedOptions {
   tutorials:Tutorial[];namespace?:string;
   storage?:{getItem(key:string):string|null;setItem(key:string,value:string):void}|null;
   document?:Document;window?:Window;getContext?:()=>Context;
-  onChange?:(state:TourState)=>void;render?:boolean;
+  onChange?:(state:TourState)=>void;render?:boolean;theme?:GuidedTheme;
 }
 export interface GuidedHelp {
   tutorials:ReadonlyArray<Tutorial>;progress:unknown;
@@ -31,9 +38,13 @@ export interface GuidedHelp {
   catalogue(query?:string):unknown[];
   next():TourState;back():TourState;pause():TourState;resume():TourState;
   skipStep():TourState;skip():TourState;restart():TourState;stop():TourState;
+  setTheme(theme:GuidedTheme):void;
   destroy():void;
 }
 export function createGuidedHelp(options?:GuidedOptions):GuidedHelp;
+export const THEME_TOKENS:Readonly<Record<ThemeToken,string>>;
+export function normalizeTheme(theme?:GuidedTheme):Readonly<Record<string,string>>;
+export function applyTheme(element:HTMLElement|null,theme?:GuidedTheme):()=>void;
 export function targetKey(target:Target):string|null;
 export function validateTutorial(tutorial:Tutorial):string[];
 export function createTutorialRegistry(items:Tutorial[]):ReadonlyArray<Tutorial>;

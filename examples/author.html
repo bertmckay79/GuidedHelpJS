@@ -12,6 +12,12 @@
     .demo-controls button{padding:.8rem 1rem}
     output{display:block;margin:1rem 0}
     main{padding-right:min(420px,45vw)}
+    :root {
+      --demo-brand-primary: #7c3aed;
+      --demo-brand-surface: #f5f0ff;
+      --demo-brand-text: #311459;
+      --demo-brand-border: #baa1e9;
+    }
     @media(max-width:900px){main{padding-right:0}body{padding-bottom:60vh}}
   </style>
 </head>
@@ -20,6 +26,12 @@
     <h1 id="demoWelcome">Tutorial Recorder</h1>
     <p>This is a real HTML page. Open the authoring panel, choose Record, then select these controls. Selection must not activate them.</p>
     <button id="openAuthor">Open tutorial authoring panel</button>
+    <p>Try the Appearance tab in the authoring panel, or apply one of these app-controlled themes:</p>
+    <div class="demo-controls">
+      <button id="applyPalette">Use purple palette</button>
+      <button id="applyVariables">Map application CSS variables</button>
+      <button id="resetTheme">Use app/default CSS</button>
+    </div>
     <div class="demo-controls">
       <button id="createProjectButton">Create Project (real action)</button>
       <button data-feature="demo.settings">Project settings (real action)</button>

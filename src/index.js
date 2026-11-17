@@ -5,6 +5,7 @@ import {createTutorialRegistry,createTutorialEngine,createTutorialProgress,
 import {createTutorialPresenter} from './tutorial-presenter.js';
 import {resolveSpotlightTarget} from './spotlight.js';
 import {searchTutorials,groupTutorials} from './catalogue.js';
+import {applyTheme,normalizeTheme} from './theme.js';
 
 const namespaceOk=name=>typeof name==='string'&&/^[a-z][a-z0-9._-]{2,80}$/.test(name);
 const active=s=>s.status==='running'||s.status==='blocked';
@@ -14,15 +15,18 @@ export {targetKey,validateTutorial,createTutorialRegistry,createTutorialEngine,
 export {resolveSpotlightTarget,placeSpotlight,createSpotlightLayer} from './spotlight.js';
 export {createTutorialPresenter} from './tutorial-presenter.js';
 export {searchTutorials,groupTutorials} from './catalogue.js';
+export {THEME_TOKENS,normalizeTheme,applyTheme} from './theme.js';
 
 export function createGuidedHelp({
   tutorials=[],namespace='guided.help',storage,
   document:providedDocument,window:providedWindow,
-  getContext=()=>({}),onChange=()=>{},render=true
+  getContext=()=>({}),onChange=()=>{},render=true,theme={}
 }={}) {
   if(!namespaceOk(namespace))throw new Error('Invalid guided help namespace');
   if(typeof getContext!=='function'||typeof onChange!=='function')
     throw new TypeError('getContext and onChange must be functions');
+  normalizeTheme(theme);
+  let activeTheme=theme,clearPanelTheme=()=>{};
   const registry=createTutorialRegistry(tutorials);
   const doc=providedDocument??(typeof document==='undefined'?null:document);
   const win=providedWindow??doc?.defaultView??(typeof window==='undefined'?null:window);
@@ -107,9 +111,10 @@ export function createGuidedHelp({
       panel.setAttribute('aria-live','polite');
       panel.setAttribute('tabindex','-1');
       doc.body.append(panel);
+      clearPanelTheme=applyTheme(panel,activeTheme);
     }
     presenter=createTutorialPresenter({
-      document:doc,window:win,
+      document:doc,window:win,theme:activeTheme,
       onPosition:position=>{placement=position;paint(engine.snapshot());},
       onAvailability:()=>engine.refresh(),
       onInteraction:payload=>engine.observe(payload)
@@ -129,6 +134,12 @@ export function createGuidedHelp({
     catalogue:(query='')=>groupTutorials(searchTutorials(registry,{
       query,context:context(),progress
     })),
+    setTheme(next){
+      normalizeTheme(next);
+      activeTheme=next;
+      clearPanelTheme();clearPanelTheme=applyTheme(panel,activeTheme);
+      presenter?.setTheme(next);
+    },
     next:()=>engine.next(),back:()=>engine.back(),
     pause:()=>engine.pause(),resume:()=>engine.resume(),
     skipStep:()=>engine.skipStep(),skip:()=>engine.skip(),
@@ -136,7 +147,7 @@ export function createGuidedHelp({
     destroy() {
       if(disposed)return;
       disposed=true;presenter?.destroy();presenter=null;engine.destroy();
-      panel?.remove();panel=null;
+      clearPanelTheme();panel?.remove();panel=null;
     }
   };
   return Object.freeze(api);
