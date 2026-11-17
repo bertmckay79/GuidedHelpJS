@@ -4,10 +4,10 @@ import {
   importTutorialJSON,exportTutorialJSON,validateDraft
 } from './draft.js';
 import {createTargetPicker} from './picker.js';
-import {applyTheme,normalizeTheme} from '../theme.js';
+import {applyTheme,normalizeTheme,THEME_TOKENS} from '../theme.js';
 
 // Optional developer-only UI. Never imported from the production entry point.
-const modes=new Set(['edit','record','preview']);
+const modes=new Set(['edit','record','preview','appearance']);
 const copy=value=>JSON.parse(JSON.stringify(value));
 
 export function createTutorialRecorder({
@@ -223,6 +223,62 @@ export function createTutorialRecorder({
       container.append(tools);
     }
   }
+  function updateTheme(next) {
+    normalizeTheme(next);
+    activeTheme=copy(next);
+    clearRecorderTheme();clearRecorderTheme=applyTheme(root,activeTheme);
+    picker?.setTheme(activeTheme);
+    previewKit?.setTheme(activeTheme);
+    render();
+    notify();
+  }
+  function updateRole(role,type,value) {
+    const next=copy(activeTheme);
+    next.palette||={};next.variables||={};
+    delete next.palette[role];delete next.variables[role];
+    if(type==='palette')next.palette[role]=value||'#0d9488';
+    if(type==='variables')next.variables[role]=value||'--app-primary';
+    try {updateTheme(next);}
+    catch(error){flash(error.message);}
+  }
+  function renderAppearance(container) {
+    container.append(el('h3','','Appearance and colours'));
+    container.append(el('p','ghr-help',
+      'Choose a colour or an existing application CSS variable for each token. These settings affect the recorder and preview, not the exported tutorial JSON.'));
+    const grid=el('div','ghr-grid');
+    const labelByRole={
+      accent:'Accent',accentText:'Accent text',surface:'Panel surface',
+      text:'Panel text',mutedText:'Muted text',border:'Border',
+      buttonBackground:'Button background',buttonText:'Button text',
+      fieldBackground:'Field background',fieldText:'Field text',
+      highlight:'Target highlight',focus:'Keyboard focus',
+      selectedBackground:'Selected step',statusBackground:'Status background',
+      warningText:'Warning text'
+    };
+    for(const role of Object.keys(THEME_TOKENS).filter(k=>k!=='shadow')) {
+      const type=activeTheme.palette?.[role]?'palette':
+        activeTheme.variables?.[role]?'variables':'default';
+      const field=el('div','ghr-theme-row');
+      field.append(row(labelByRole[role],selectField(type,[
+        ['default','Use CSS/default'],['palette','Fixed colour'],['variables','App CSS variable']
+      ],value=>updateRole(role,value))));
+      if(type!=='default') {
+        field.append(row(type==='variables'?'CSS variable name':'CSS colour',
+          textField(type==='variables'?activeTheme.variables[role]:activeTheme.palette[role],
+            value=>updateRole(role,type,value),{
+              placeholder:type==='variables'?'--app-primary':'#0d9488',maxLength:110
+            })));
+      }
+      grid.append(field);
+    }
+    container.append(grid);
+    container.append(el('p','ghr-help',
+      'You can also define --gh-* variables in application CSS without passing a theme option.'));
+    const config=el('textarea','ghr-theme-json');
+    config.readOnly=true;config.value=JSON.stringify(activeTheme,null,2);
+    config.setAttribute('aria-label','Theme configuration JSON');
+    container.append(row('Copy this theme configuration into your application',config));
+  }
   function renderPreview(container) {
     container.append(el('p','ghr-help',
       'Live preview uses the production tutorial presenter. Only real user interactions advance interaction steps.'));
@@ -234,7 +290,9 @@ export function createTutorialRecorder({
     root.replaceChildren();
     root.append(el('h2','','GuidedHelpJS · Author'));
     const nav=el('div','ghr-toolbar');
-    for(const [name,label] of [['edit','Edit'],['record','Record'],['preview','Preview']]){
+    for(const [name,label] of [
+      ['edit','Edit'],['record','Record'],['appearance','Appearance'],['preview','Preview']
+    ]){
       const tab=action(label,()=>setMode(name));
       tab.setAttribute('aria-pressed',String(mode===name));
       nav.append(tab);
@@ -245,6 +303,7 @@ export function createTutorialRecorder({
     root.append(info);
     const content=el('div','ghr-content');
     if(mode==='preview')renderPreview(content);
+    else if(mode==='appearance')renderAppearance(content);
     else renderAuthor(content);
     root.append(content);
     root.append(action('New tutorial',()=>{
@@ -321,14 +380,7 @@ export function createTutorialRecorder({
   }
   return Object.freeze({
     mount,destroy,setMode,
-    setTheme(next){
-      normalizeTheme(next);
-      activeTheme=next;
-      clearRecorderTheme();clearRecorderTheme=applyTheme(root,activeTheme);
-      picker?.setTheme(next);
-      previewKit?.setTheme(next);
-      render();
-    },
+    setTheme:updateTheme,
     getTheme:()=>copy(activeTheme),
     getDraft:()=>copy(draft),
     getMode:()=>mode,
