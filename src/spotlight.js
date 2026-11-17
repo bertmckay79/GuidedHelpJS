@@ -1,4 +1,5 @@
 import {targetKey} from './tutorials.js';
+import {applyTheme,normalizeTheme} from './theme.js';
 // Zero-dependency, offline spotlight geometry. Targets are validated HTML IDs or semantic data-feature attributes,
 // never arbitrary selectors or remote expressions.
 const clamp=(n,lo,hi)=>Math.max(lo,Math.min(hi,n));
@@ -46,15 +47,19 @@ export function placeSpotlight(rect,{width,height},panelHeight=240) {
   };
 }
 export function createSpotlightLayer({document:doc,window:win,onPosition=()=>{},
-  onUnavailable=()=>{}}={}) {
+  onUnavailable=()=>{},theme={}}={}) {
+  normalizeTheme(theme);
+  let activeTheme=theme,clearTheme=()=>{};
   let id=null,element=null,disposed=false,raf=0,resizeObserver=null;
   const setElement=next=>{
     if(element===next)return;
+    clearTheme();clearTheme=()=>{};
     if(element)element.classList?.remove('discovery-spotlight-target');
     resizeObserver?.disconnect();resizeObserver=null;
     element=next;
     if(element){
       element.classList?.add('discovery-spotlight-target');
+      clearTheme=applyTheme(element,activeTheme);
       if(win?.ResizeObserver){
         resizeObserver=new win.ResizeObserver(()=>schedule());
         resizeObserver.observe(element);
@@ -102,6 +107,12 @@ export function createSpotlightLayer({document:doc,window:win,onPosition=()=>{},
       return !!element;
     },
     reposition:schedule,
+    setTheme(next) {
+      normalizeTheme(next);
+      activeTheme=next;
+      clearTheme();clearTheme=()=>{};
+      if(element)clearTheme=applyTheme(element,activeTheme);
+    },
     destroy() {
       if(disposed)return;
       disposed=true;unlisten();
