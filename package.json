@@ -36,7 +36,8 @@
   ],
   "scripts": {
     "test": "node --test",
-    "check": "node --check src/index.js && node --check src/tutorials.js && node --check src/spotlight.js && node --check src/tutorial-presenter.js && node --check src/vue.js && node --check src/authoring/draft.js && node --check src/authoring/picker.js && node --check src/authoring/index.js && node --check examples/author.js"
+    "check": "node --check src/index.js && node --check src/tutorials.js && node --check src/spotlight.js && node --check src/tutorial-presenter.js && node --check src/vue.js && node --check src/authoring/draft.js && node --check src/authoring/picker.js && node --check src/authoring/index.js && node --check examples/author.js",
+    "test:browser": "playwright test"
   },
   "peerDependencies": {
     "vue": "^3.0.0"
@@ -48,5 +49,8 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.0"
   }
 }
