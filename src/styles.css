@@ -1,5 +1,5 @@
 .discovery-spotlight-target {
-  outline: 3px solid #0d9488 !important;
+  outline: 3px solid var(--gh-highlight, var(--gh-accent, #0d9488)) !important;
   outline-offset: 4px;
   border-radius: 3px;
 }
@@ -10,33 +10,50 @@
   max-height: min(70vh, 480px);
   overflow: auto;
   padding: 16px;
-  background: #fff;
-  color: #1b2633;
-  border: 1px solid #bcc8d2;
+  background: var(--gh-surface, #fff);
+  color: var(--gh-text, #1b2633);
+  border: 1px solid var(--gh-border, #bcc8d2);
   border-radius: 10px;
-  box-shadow: 0 12px 38px rgba(0,0,0,.25);
+  box-shadow: var(--gh-shadow, 0 12px 38px rgba(0,0,0,.25));
   font: 14px/1.45 system-ui,sans-serif;
 }
 .guided-help-panel[hidden] { display: none !important; }
 .guided-help-panel p { margin: 0 0 8px; }
 .guided-help-panel .gh-eyebrow, .guided-help-panel .gh-counter {
-  font-size: 12px; color: #526375;
+  font-size: 12px; color: var(--gh-muted-text, #526375);
 }
 .guided-help-panel .gh-title { font-size: 18px; font-weight: 650; }
 .guided-help-panel .gh-body { white-space: pre-wrap; }
-.guided-help-panel .gh-unavailable { font-style: italic; color: #7d4125; }
+.guided-help-panel .gh-unavailable {
+  font-style: italic; color: var(--gh-warning-text, #7d4125);
+}
 .guided-help-panel .gh-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
 .guided-help-panel button {
-  border: 1px solid #7d93a8; border-radius: 6px; background: #f2f5f8;
-  color: #172333; font: inherit; cursor: pointer; padding: 5px 10px;
+  border: 1px solid var(--gh-border, #7d93a8);
+  border-radius: 6px; background: var(--gh-button-bg, #f2f5f8);
+  color: var(--gh-button-text, #172333); font: inherit; cursor: pointer;
+  padding: 5px 10px;
 }
-.guided-help-panel button:focus-visible { outline: 3px solid #0d9488; outline-offset: 2px; }
+.guided-help-panel button:focus-visible {
+  outline: 3px solid var(--gh-focus, var(--gh-accent, #0d9488));
+  outline-offset: 2px;
+}
 @media (prefers-reduced-motion: reduce) {
   .guided-help-panel,.discovery-spotlight-target { transition: none !important; }
 }
 @media (prefers-color-scheme: dark) {
-  .guided-help-panel { background:#202a37; color:#f4f7fb; border-color:#71859b; }
-  .guided-help-panel .gh-eyebrow,.guided-help-panel .gh-counter {color:#d3deea;}
-  .guided-help-panel .gh-unavailable { color:#ffbe8f; }
-  .guided-help-panel button { background:#2d3c4e; color:#fff; border-color:#8ea4bb; }
+  .guided-help-panel {
+    background: var(--gh-surface, #202a37);
+    color: var(--gh-text, #f4f7fb);
+    border-color: var(--gh-border, #71859b);
+  }
+  .guided-help-panel .gh-eyebrow,.guided-help-panel .gh-counter {
+    color:var(--gh-muted-text, #d3deea);
+  }
+  .guided-help-panel .gh-unavailable { color: var(--gh-warning-text, #ffbe8f); }
+  .guided-help-panel button {
+    background: var(--gh-button-bg, #2d3c4e);
+    color: var(--gh-button-text, #fff);
+    border-color: var(--gh-border, #8ea4bb);
+  }
 }
