@@ -70,6 +70,14 @@
   overflow-wrap: anywhere;
 }
 .ghr-panel .ghr-import { width: 100%; display: grid; gap: 5px; }
+.ghr-panel .ghr-theme-row {
+  padding: 8px;
+  display: grid;
+  gap: 6px;
+  border: 1px solid var(--gh-border, #9db3c4);
+  border-radius: 6px;
+}
+.ghr-panel .ghr-theme-json { min-height: 135px; }
 .ghr-panel .ghr-secondary { margin-top: 14px; }
 .ghr-panel :is(button,input,textarea,select):focus-visible {
   outline: 3px solid var(--gh-focus, var(--gh-accent, #0c766d));
