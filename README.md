@@ -4,11 +4,12 @@
 
 Lightweight, offline-first, framework-agnostic JavaScript guided tutorials built around **real HTML controls**. Supports existing element IDs, `data-feature` attributes, JSON tutorial definitions, local progress and safe interaction. Optional Vue 3 integration.
 
-> **Status:** v0.1.0 development preview. This repository is not yet published to npm; the API is subject to change. Sprite Rig Studio still uses its own existing implementation until an independently tested migration is merged.
+> **Status:** v0.2.0 development preview. This repository is not yet published to npm; the API is subject to change. Sprite Rig Studio still uses its own existing implementation until an independently tested migration is merged.
 
 ## Features
 
 - Zero runtime dependencies for the Vanilla JavaScript engine and DOM presenter.
+- Optional developer-only visual authoring companion with target selection, editable steps, preview and JSON import/export.
 - JSON definitions with an included [JSON Schema](./schema/tutorial.schema.json).
 - Explicit `{ "id": "existingButton" }` or `{ "feature": "app.projects" }` targets. A legacy string target also means `data-feature`.
 - Observes only native, trusted `click` / `change` events; **never performs clicks**, submits forms or approves artwork.
@@ -27,6 +28,49 @@ python -m http.server 8000
 ```
 
 Open http://localhost:8000/examples/ . This sample imports `src/index.js` directly and fetches a same-origin JSON file. It doesn't need Vue, npm installation, a CDN or a backend. (Loading a module directly from `file://` is not supported by most browsers.)
+
+## Optional visual recorder and authoring editor
+
+The recorder is a **development-only, opt-in companion**. It is not imported by the default `@bm3d/guided` entry point. The core runtime still has zero dependencies; the optional recorder reuses its validator, presenter and state engine.
+
+**Try the [interactive authoring demo](./examples/author.html)** on the local server:
+
+```sh
+python3 -m http.server 8000
+```
+
+Open http://127.0.0.1:8000/examples/author.html.
+
+1. Open **Tutorial Authoring**, then choose **Record**.
+2. Hover and click application controls with a stable HTML `id` or `data-feature` attribute. The picker suppresses the selected control's actual click/activation and does **not** read page text or form values.
+3. Press **Escape** or **Stop selecting**, then use **Edit** to rename the tutorial and steps, change the progression trigger, mark optional steps, and reorder or remove steps. Every captured step starts in `explicit-next` mode.
+4. Select **Preview**. The actual runtime positions the help card on the live page and only follows genuine user actions or explicit Next. Preview is in-memory and cannot invoke host functions.
+5. Use **Download JSON** or **Import JSON**. Imported tutorials are validated against the same strict contract. The editor does not automatically save content to a server or browser storage.
+
+### Development-only integration
+
+```js
+// Import this only in your local/dev authoring entry point.
+// Do not bundle into your production application.
+import {createTutorialRecorder} from '@bm3d/guided/recorder';
+import '@bm3d/guided/styles.css';
+import '@bm3d/guided/recorder/styles.css';
+
+const recorder=createTutorialRecorder({
+  getContext:()=>({page:'home',busy:false,modal:false})
+});
+recorder.mount();
+
+// Optionally: recorder.setMode('record');
+// recorder.exportJSON(); // returns validated JSON
+// recorder.destroy();    // removes listeners and DOM UI
+```
+
+Import accepts only one tutorial JSON object (1–32 steps) and rejects unknown fields, invalid IDs, unsupported interactions and oversized payloads. All step content remains local to the browser until the developer chooses to export it. The file export uses a browser download; no server or telemetry is involved.
+
+**Safety:** "Record" means **select and describe targets**, not capture screen video, event replay or keystrokes. Private input fields and `data-guided-private` sections are unselectable. During selection, click, pointer and keyboard activation on host controls is intercepted; while editing/previewing, host interaction remains under the user's control. The recorder is not an app automation tool.
+
+Current limitations: automatic route navigation, targetless introductory steps, arbitrary CSS selectors, draft autosave, native WebView2/touch verification and visual regression coverage are intentionally outside this first version. Live browser tests cover the provided Chromium demo, not every host application.
 
 ## Use in Vanilla JavaScript
 
@@ -115,6 +159,9 @@ const help = useGuidedHelp({
 ```sh
 npm run check
 npm test
+npm install --no-audit --no-fund
+npx playwright install chromium
+npm run test:browser
 npm pack --dry-run
 ```
 

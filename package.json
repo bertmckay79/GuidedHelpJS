@@ -1,6 +1,6 @@
 {
   "name": "@bm3d/guided",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Framework-agnostic, offline-first guided tutorials with JSON definitions, ID and data-feature targets",
   "private": false,
   "type": "module",
@@ -10,7 +10,8 @@
     "url": "git+https://github.com/bertmckay79/GuidedHelpJS.git"
   },
   "sideEffects": [
-    "./src/styles.css"
+    "./src/styles.css",
+    "./src/authoring/authoring.css"
   ],
   "exports": {
     ".": {
@@ -20,7 +21,12 @@
     "./core": "./src/tutorials.js",
     "./vue": "./src/vue.js",
     "./styles.css": "./src/styles.css",
-    "./schema": "./schema/tutorial.schema.json"
+    "./schema": "./schema/tutorial.schema.json",
+    "./recorder": {
+      "types": "./src/authoring/index.d.ts",
+      "default": "./src/authoring/index.js"
+    },
+    "./recorder/styles.css": "./src/authoring/authoring.css"
   },
   "files": [
     "src",
@@ -30,7 +36,8 @@
   ],
   "scripts": {
     "test": "node --test",
-    "check": "node --check src/index.js && node --check src/tutorials.js && node --check src/spotlight.js && node --check src/tutorial-presenter.js && node --check src/vue.js"
+    "check": "node --check src/index.js && node --check src/tutorials.js && node --check src/spotlight.js && node --check src/tutorial-presenter.js && node --check src/vue.js && node --check src/authoring/draft.js && node --check src/authoring/picker.js && node --check src/authoring/index.js && node --check examples/author.js",
+    "test:browser": "playwright test"
   },
   "peerDependencies": {
     "vue": "^3.0.0"
@@ -42,5 +49,8 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.0"
   }
 }

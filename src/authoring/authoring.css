@@ -1,0 +1,76 @@
+/* Optional developer-only authoring UI. Not imported by @bm3d/guided. */
+.ghr-panel {
+  position: fixed;
+  box-sizing: border-box;
+  z-index: 2147482001;
+  inset: 12px 12px auto auto;
+  width: min(430px, calc(100vw - 24px));
+  max-height: min(90vh, 860px);
+  overflow: auto;
+  border: 1px solid #9db3c4;
+  border-radius: 12px;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, .28);
+  background: #f8fafc;
+  color: #162535;
+  padding: 16px;
+  font: 14px/1.45 system-ui, sans-serif;
+}
+.ghr-panel *, .ghr-panel *::before, .ghr-panel *::after { box-sizing: border-box; }
+.ghr-panel h2 { margin: 0 0 10px; font-size: 18px; }
+.ghr-panel h3 { margin: 14px 0 8px; font-size: 15px; }
+.ghr-panel .ghr-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin: 8px 0; }
+.ghr-panel button {
+  font: inherit;
+  color: #132638;
+  background: #e8eef3;
+  border: 1px solid #8298aa;
+  border-radius: 6px;
+  padding: 6px 9px;
+  cursor: pointer;
+}
+.ghr-panel button[aria-pressed="true"] { color: #fff; background: #0c766d; border-color: #065f58; }
+.ghr-panel button:disabled { cursor: not-allowed; opacity: .5; }
+.ghr-panel .ghr-help { margin: 6px 0 12px; font-size: 13px; }
+.ghr-panel .ghr-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 9px; }
+.ghr-panel .ghr-field { display: flex; flex-direction: column; gap: 3px; font-size: 12px; font-weight: 600; }
+.ghr-panel input:not([type="checkbox"]), .ghr-panel textarea, .ghr-panel select {
+  display: block;
+  width: 100%;
+  border: 1px solid #8298aa;
+  border-radius: 5px;
+  font: 14px/1.35 system-ui, sans-serif;
+  color: #152b3e;
+  background: #fff;
+  padding: 7px;
+  min-height: 34px;
+}
+.ghr-panel textarea { resize: vertical; min-height: 64px; }
+.ghr-panel input[type="checkbox"] { width: 18px; height: 18px; margin: 4px 0; }
+.ghr-panel .ghr-steps { padding-left: 0; list-style: none; display: grid; gap: 6px; }
+.ghr-panel .ghr-steps li { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.ghr-panel .ghr-steps li button:first-child { flex: 1; text-align: left; }
+.ghr-panel .ghr-steps .ghr-selected { background: #d8f4ed; border-radius: 6px; }
+.ghr-panel .ghr-steps .ghr-small { font-size: 12px; padding: 4px 7px; }
+.ghr-panel .ghr-status { margin: 6px 0; color: #3c5367; white-space: pre-wrap; }
+.ghr-panel .ghr-validation { margin: 10px 0; background: #e2eee9; padding: 9px; border-radius: 6px; overflow-wrap: anywhere; }
+.ghr-panel .ghr-import { width: 100%; display: grid; gap: 5px; }
+.ghr-panel .ghr-secondary { margin-top: 14px; }
+.ghr-panel :is(button,input,textarea,select):focus-visible {
+  outline: 3px solid #0c766d;
+  outline-offset: 2px;
+}
+.ghr-candidate {
+  outline: 3px dashed #0c766d !important;
+  outline-offset: 3px;
+  cursor: crosshair !important;
+}
+@media (prefers-color-scheme: dark) {
+  .ghr-panel { background: #1d2834; color: #eef5fb; border-color: #697f92; }
+  .ghr-panel button { color: #e7f5ff; background: #304052; border-color: #8a9caf; }
+  .ghr-panel .ghr-selected { background: #244b4b; }
+  .ghr-panel .ghr-status, .ghr-panel .ghr-help { color: #d2e0e9; }
+  .ghr-panel .ghr-validation { background: #244c42; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ghr-panel, .ghr-candidate { transition: none !important; }
+}

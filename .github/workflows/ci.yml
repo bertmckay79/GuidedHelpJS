@@ -16,3 +16,14 @@ jobs:
       - run: npm run check
       - run: npm test
       - run: npm pack --dry-run
+  browser:
+    # Playwright 1.56 Chromium does not support Ubuntu 26.04 yet.
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:browser
