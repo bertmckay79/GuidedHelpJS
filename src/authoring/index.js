@@ -4,6 +4,7 @@ import {
   importTutorialJSON,exportTutorialJSON,validateDraft
 } from './draft.js';
 import {createTargetPicker} from './picker.js';
+import {applyTheme,normalizeTheme} from '../theme.js';
 
 // Optional developer-only UI. Never imported from the production entry point.
 const modes=new Set(['edit','record','preview']);
@@ -14,11 +15,14 @@ export function createTutorialRecorder({
   window:win=doc?.defaultView,
   getContext=()=>({}),
   initialTutorial=null,
+  theme={},
   onChange=()=>{}
 }={}) {
   if(!doc?.body||!doc.createElement)throw new TypeError('A browser document is required');
   if(typeof getContext!=='function'||typeof onChange!=='function')
     throw new TypeError('Invalid recorder callbacks');
+  normalizeTheme(theme);
+  let activeTheme=theme,clearRecorderTheme=()=>{};
   let draft=initialTutorial?
     importTutorialJSON(JSON.stringify(initialTutorial)):createDraft();
   let root=null,picker=null,previewKit=null;
@@ -267,7 +271,7 @@ export function createTutorialRecorder({
         previewKit=createGuidedHelp({
           document:doc,window:win,
           namespace:'guidedhelpjs.author-preview',storage:null,
-          tutorials:[draft],getContext,
+          tutorials:[draft],getContext,theme:activeTheme,
           onChange:state=>{
             previewStatus='Step '+(state.index+1)+'/'+state.total+
               ' · '+state.status+(state.reason?' ('+state.reason+')':'');
@@ -293,8 +297,9 @@ export function createTutorialRecorder({
     root.setAttribute('aria-label','Guided tutorial authoring');
     root.setAttribute('data-guided-private','');
     doc.body.append(root);
+    clearRecorderTheme=applyTheme(root,activeTheme);
     picker=createTargetPicker({
-      document:doc,root:doc.body,
+      document:doc,root:doc.body,theme:activeTheme,
       isEditorElement:target=>root?.contains(target),
       onHighlight:(_,reason)=>{if(reason)flash(reason);},
       onSelect:target=>{
@@ -312,10 +317,19 @@ export function createTutorialRecorder({
   function destroy() {
     if(disposed)return;
     stopPreview();picker?.destroy();picker=null;
-    root?.remove();root=null;disposed=true;
+    clearRecorderTheme();root?.remove();root=null;disposed=true;
   }
   return Object.freeze({
     mount,destroy,setMode,
+    setTheme(next){
+      normalizeTheme(next);
+      activeTheme=next;
+      clearRecorderTheme();clearRecorderTheme=applyTheme(root,activeTheme);
+      picker?.setTheme(next);
+      previewKit?.setTheme(next);
+      render();
+    },
+    getTheme:()=>copy(activeTheme),
     getDraft:()=>copy(draft),
     getMode:()=>mode,
     getErrors:()=>validateDraft(draft),
