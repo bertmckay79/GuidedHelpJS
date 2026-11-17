@@ -1,0 +1,46 @@
+{
+  "name": "@bm3d/guided",
+  "version": "0.1.0",
+  "description": "Framework-agnostic, offline-first guided tutorials with JSON definitions, ID and data-feature targets",
+  "private": false,
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bertmckay79/GuidedHelpJS.git"
+  },
+  "sideEffects": [
+    "./src/styles.css"
+  ],
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "default": "./src/index.js"
+    },
+    "./core": "./src/tutorials.js",
+    "./vue": "./src/vue.js",
+    "./styles.css": "./src/styles.css",
+    "./schema": "./schema/tutorial.schema.json"
+  },
+  "files": [
+    "src",
+    "schema",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "node --test",
+    "check": "node --check src/index.js && node --check src/tutorials.js && node --check src/spotlight.js && node --check src/tutorial-presenter.js && node --check src/vue.js"
+  },
+  "peerDependencies": {
+    "vue": "^3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "vue": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
