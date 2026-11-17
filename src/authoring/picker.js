@@ -33,6 +33,9 @@ export function createTargetPicker({
     if(isEditor(event))return;
     if(event.key==='Enter'||event.key===' '){
       event.preventDefault();event.stopImmediatePropagation();
+      const target=suggestedTarget(event.target,{root});
+      if(event.isTrusted===true&&target)onSelect(target);
+      else if(!target)onHighlight(null,'No stable HTML ID or data-feature on this control');
     }
   };
   const pointer=event=>{
@@ -58,8 +61,8 @@ export function createTargetPicker({
     if(!enabled||isEditor(event))return;
     swallow(event);
     const target=suggestedTarget(event.target,{root});
-    if(target)onSelect(target);
-    else onHighlight(null,'No stable HTML ID or data-feature on this control');
+    if(target&&event.isTrusted===true)onSelect(target);
+    else if(!target)onHighlight(null,'No stable HTML ID or data-feature on this control');
   };
   const listeners=[
     ['pointerover',pointer,true],
@@ -71,7 +74,10 @@ export function createTargetPicker({
     ['touchstart',swallow,{capture:true,passive:false}],
     ['touchend',swallow,{capture:true,passive:false}],
     ['click',select,true],
-    ['keydown',keydown,true]
+    ['keydown',keydown,true],
+    ['keyup',event=>{
+      if(enabled&&!isEditor(event)&&(event.key==='Enter'||event.key===' '))swallow(event);
+    },true]
   ];
   function activate() {
     if(enabled)return;
