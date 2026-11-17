@@ -1,0 +1,37 @@
+{
+  "id": "demo.first-tour",
+  "title": "Explore GuidedHelpJS",
+  "category": "Getting started",
+  "summary": "A three-step tour of a real HTML page",
+  "page": "demo",
+  "steps": [
+    {
+      "id": "welcome",
+      "title": "Welcome",
+      "body": "This is a live page, not a screenshot.",
+      "target": {
+        "id": "welcomeText"
+      },
+      "advance": "explicit-next"
+    },
+    {
+      "id": "click",
+      "title": "Click the real button",
+      "body": "Click the button yourself. The tutorial never synthesizes an event.",
+      "target": {
+        "id": "realButton"
+      },
+      "advance": "observed-user-interaction",
+      "eventType": "click"
+    },
+    {
+      "id": "feature",
+      "title": "Semantic target",
+      "body": "Legacy data-feature attributes work too.",
+      "target": {
+        "feature": "demo.info"
+      },
+      "advance": "explicit-next"
+    }
+  ]
+}
