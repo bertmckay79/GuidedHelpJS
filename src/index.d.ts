@@ -25,8 +25,12 @@ export interface Context {
   visibleTargets?:Target[];signals?:string[];availability?:Record<string,boolean>;
   busy?:boolean;modal?:boolean;authRequired?:boolean;[key:string]:unknown;
 }
+export interface SessionTutorialSource {
+  key?:string;
+  storage?:Pick<Storage,'getItem'>|null;
+}
 export interface GuidedOptions {
-  tutorials:Tutorial[];namespace?:string;
+  tutorials?:Tutorial[];sessionTutorials?:SessionTutorialSource|null;namespace?:string;
   storage?:{getItem(key:string):string|null;setItem(key:string,value:string):void}|null;
   document?:Document;window?:Window;getContext?:()=>Context;
   onChange?:(state:TourState)=>void;render?:boolean;theme?:GuidedTheme;
@@ -36,12 +40,20 @@ export interface GuidedHelp {
   mount():boolean;start(id:string,opts?:{resume?:boolean}):TourState;
   snapshot():TourState;refresh():TourState;
   catalogue(query?:string):unknown[];
+  reloadSessionTutorials():ReadonlyArray<Tutorial>;
   next():TourState;back():TourState;pause():TourState;resume():TourState;
   skipStep():TourState;skip():TourState;restart():TourState;stop():TourState;
   setTheme(theme:GuidedTheme):void;
   destroy():void;
 }
 export function createGuidedHelp(options?:GuidedOptions):GuidedHelp;
+export const SESSION_TUTORIAL_MAX_BYTES:number;
+export const SESSION_TUTORIAL_MAX_ITEMS:number;
+export function readTutorialsFromSessionStorage(options:{
+  key:string;
+  storage:Pick<Storage,'getItem'>;
+  maxBytes?:number;
+}):ReadonlyArray<Tutorial>;
 export const THEME_TOKENS:Readonly<Record<ThemeToken,string>>;
 export function normalizeTheme(theme?:GuidedTheme):Readonly<Record<string,string>>;
 export function applyTheme(element:HTMLElement|null,theme?:GuidedTheme):()=>void;

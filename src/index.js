@@ -6,6 +6,7 @@ import {createTutorialPresenter} from './tutorial-presenter.js';
 import {resolveSpotlightTarget} from './spotlight.js';
 import {searchTutorials,groupTutorials} from './catalogue.js';
 import {applyTheme,normalizeTheme} from './theme.js';
+import {readTutorialsFromSessionStorage} from './session-tutorials.js';
 
 const namespaceOk=name=>typeof name==='string'&&/^[a-z][a-z0-9._-]{2,80}$/.test(name);
 const active=s=>s.status==='running'||s.status==='blocked';
@@ -16,9 +17,11 @@ export {resolveSpotlightTarget,placeSpotlight,createSpotlightLayer} from './spot
 export {createTutorialPresenter} from './tutorial-presenter.js';
 export {searchTutorials,groupTutorials} from './catalogue.js';
 export {THEME_TOKENS,normalizeTheme,applyTheme} from './theme.js';
+export {readTutorialsFromSessionStorage,SESSION_TUTORIAL_MAX_BYTES,
+  SESSION_TUTORIAL_MAX_ITEMS} from './session-tutorials.js';
 
 export function createGuidedHelp({
-  tutorials=[],namespace='guided.help',storage,
+  tutorials=[],sessionTutorials=null,namespace='guided.help',storage,
   document:providedDocument,window:providedWindow,
   getContext=()=>({}),onChange=()=>{},render=true,theme={}
 }={}) {
@@ -27,9 +30,29 @@ export function createGuidedHelp({
     throw new TypeError('getContext and onChange must be functions');
   normalizeTheme(theme);
   let activeTheme=theme,clearPanelTheme=()=>{};
-  const registry=createTutorialRegistry(tutorials);
   const doc=providedDocument??(typeof document==='undefined'?null:document);
   const win=providedWindow??doc?.defaultView??(typeof window==='undefined'?null:window);
+  const staticTutorials=createTutorialRegistry(tutorials);
+  if(sessionTutorials!==null&&(!sessionTutorials||
+     typeof sessionTutorials!=='object'||Array.isArray(sessionTutorials)||
+     Object.keys(sessionTutorials).some(k=>k!=='key'&&k!=='storage')))
+    throw new TypeError('Invalid session tutorial source configuration');
+  const sessionKey=sessionTutorials?.key??namespace+':catalogue:v1';
+  function loadRegistry() {
+    if(sessionTutorials===null)return staticTutorials;
+    let sessionStorage;
+    if('storage' in sessionTutorials)sessionStorage=sessionTutorials.storage;
+    else {
+      try {sessionStorage=win?.sessionStorage;}
+      catch(_) {throw new Error('Session tutorial storage is unavailable');}
+    }
+    const fromSession=readTutorialsFromSessionStorage({
+      storage:sessionStorage,key:sessionKey
+    });
+    // Reject duplicate IDs across static and session sources.
+    return createTutorialRegistry([...staticTutorials,...fromSession]);
+  }
+  let registry=loadRegistry();
   let backingStorage=storage;
   if(backingStorage===undefined) {
     try {backingStorage=win?.localStorage??null;} catch(_) {backingStorage=null;}
@@ -129,7 +152,23 @@ export function createGuidedHelp({
   }
   const refresh=()=>engine.refresh();
   const api={
-    tutorials:registry,progress,mount,start,refresh,
+    get tutorials(){return registry;},
+    progress,mount,start,refresh,
+    reloadSessionTutorials() {
+      if(disposed)throw new Error('Guided help has been destroyed');
+      if(sessionTutorials===null)return registry;
+      // Validate everything first. A bad update cannot replace a running tour.
+      const replacement=loadRegistry();
+      presenter?.setStep(null);
+      engine.stop();
+      engine.destroy();
+      registry=replacement;
+      engine=createTutorialEngine({
+        tutorials:registry,progress,getContext:context,onChange:changed
+      });
+      changed(engine.snapshot());
+      return registry;
+    },
     snapshot:()=>engine.snapshot(),
     catalogue:(query='')=>groupTutorials(searchTutorials(registry,{
       query,context:context(),progress

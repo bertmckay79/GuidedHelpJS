@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>GuidedHelpJS – Session tutorial catalogue</title>
+  <link rel="stylesheet" href="../src/styles.css">
+  <style>
+    body{font:16px/1.5 system-ui,sans-serif;max-width:750px;margin:3rem auto;padding:1rem}
+    button{padding:.7rem 1rem;margin:.3rem}
+    output{display:block;margin:1rem 0}
+  </style>
+</head>
+<body>
+  <h1 id="sessionIntro">Session-storage tutorials</h1>
+  <p>Session tutorial definitions stay in this browser tab. Use the buttons to update
+  <code>sessionStorage</code>, reload the validated catalogue, and start a tutorial.</p>
+  <button id="storeTutorial">Store one tutorial + reload</button>
+  <button id="replaceTutorial">Replace tutorial + reload</button>
+  <button id="clearTutorial">Remove session tutorials + reload</button>
+  <button id="startTutorial">Start available tutorial</button>
+  <p id="sessionTarget">This real target is highlighted when a session tutorial runs.</p>
+  <output id="sessionStatus" aria-live="polite"></output>
+  <p><a href="./">Normal demo</a> · <a href="./author.html">Authoring demo</a></p>
+  <script type="module" src="./session.js"></script>
+</body>
+</html>
