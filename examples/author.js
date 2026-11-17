@@ -23,3 +23,31 @@ document.getElementById('openAuthor').addEventListener('click',()=>{
     page:'demo'
   });
 });
+
+document.getElementById('applyPalette').addEventListener('click',()=>{
+  author?.setTheme({
+    palette:{
+      accent:'#7c3aed',
+      accentText:'#ffffff',
+      surface:'#f5f0ff',
+      text:'#311459',
+      border:'#baa1e9',
+      focus:'#7c3aed',
+      highlight:'#7c3aed',
+      buttonBackground:'#e5d8ff',
+      buttonText:'#311459'
+    }
+  });
+});
+document.getElementById('applyVariables').addEventListener('click',()=>{
+  author?.setTheme({
+    variables:{
+      accent:'--demo-brand-primary',
+      highlight:'--demo-brand-primary',
+      surface:'--demo-brand-surface',
+      text:'--demo-brand-text',
+      border:'--demo-brand-border'
+    }
+  });
+});
+document.getElementById('resetTheme').addEventListener('click',()=>author?.setTheme({}));
