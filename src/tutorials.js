@@ -7,6 +7,8 @@ export const TUTORIAL_TRIGGERS=Object.freeze([
   'explicit-next','observed-user-interaction','read-only-state-reached'
 ]);
 const ID=/^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$/;
+const HTML_ID=/^[A-Za-z_][A-Za-z0-9_.:-]*$/;
+const htmlId=value=>typeof value==='string'&&value.length<=120&&HTML_ID.test(value);
 const STATUS=new Set(['running','blocked','paused','skipped','completed']);
 const EVENT_TYPES=new Set(['click','change']);
 const text=(v,max)=>typeof v==='string'&&v.trim().length>0&&v.length<=max&&!/[<>\x00-\x1f]/.test(v);
@@ -17,7 +19,7 @@ export function targetKey(target) {
   if(typeof target==='string')return id(target)?'feature:'+target:null;
   if(!target||typeof target!=='object'||Array.isArray(target)||
      Object.keys(target).length!==1)return null;
-  if(own(target,'id'))return id(target.id)?'id:'+target.id:null;
+  if(own(target,'id'))return htmlId(target.id)?'id:'+target.id:null;
   if(own(target,'feature'))return id(target.feature)?'feature:'+target.feature:null;
   return null;
 }
